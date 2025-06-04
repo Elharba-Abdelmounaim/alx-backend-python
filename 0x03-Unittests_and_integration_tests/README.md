@@ -46,15 +46,4 @@ Or run all tests:
 
 python3 -m unittest discover
 ```
-🧠 Logic Flow Diagram (Mermaid)
-The following diagram shows how the Client class fetches GitHub organization data:
-
-
-flowchart TD
-    A[Client Class] --> B[get_org]
-    B --> C[utils.get_json]
-    C --> D[requests.get(url)]
-    D --> E[Return JSON data]
-You can visualize this Mermaid diagram on GitHub or with a Markdown preview extension in VS Code.
-
 
