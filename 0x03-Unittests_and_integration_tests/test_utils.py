@@ -7,6 +7,8 @@ from parameterized import parameterized
 from utils import access_nested_map 
 from utils import get_json
 
+from client import GithubOrgClient
+
 
 class TestAccessNestedMap(unittest.TestCase):
     """Test cases for access_nested_map"""
@@ -47,6 +49,27 @@ class TestGetJson(unittest.TestCase):
 
         mock_get.assert_called_once_with(test_url)
         self.assertEqual(result, test_payload)
+
+class TestGithubOrgClient(unittest.TestCase):
+    """Test case for GithubOrgClient.org method"""
+
+    @parameterized.expand([
+        ("google",),
+        ("abc",),
+    ])
+
+    @patch("client.get_json")
+    def test_org(self, org_name, mock_get_json):
+        """Test that GithubOrgClient.org returns correct result"""
+        expected_result = {"name": org_name}
+        mock_get_json.return_value = expected_result
+
+        client = GithubOrgClient(org_name)
+        result = client.org
+
+        self.assertEqual(result, expected_result)
+
+        mock_get_json.assert_called_once_with(f"https://api.github.com/orgs/{org_name}")
 
 if __name__ == '__main__':
     unittest.main()
