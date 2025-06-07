@@ -1,28 +1,25 @@
+# messaging_app/chats/serializers.py
 from rest_framework import serializers
-from django.contrib.auth import get_user_model
-from .models import Conversation, Message
+from .models import CustomUser, Conversation, Message
 
-User = get_user_model()
-
-# User Serializer
-class UserSerializer(serializers.ModelSerializer):
+class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = ['id', 'username', 'email']
+        model = CustomUser
+        fields = ['id', 'username', 'bio']
 
-# Message Serializer
-class MessageSerializer(serializers.ModelSerializer):
-    sender = UserSerializer(read_only=True)
-
-    class Meta:
-        model = Message
-        fields = ['id', 'sender', 'content', 'timestamp', 'conversation']
-
-# Conversation Serializer with nested messages
 class ConversationSerializer(serializers.ModelSerializer):
-    participants = UserSerializer(many=True, read_only=True)
-    messages = MessageSerializer(source='message_set', many=True, read_only=True)
-
+    participants = CustomUserSerializer(many=True, read_only=True)
+    
     class Meta:
         model = Conversation
-        fields = ['id', 'participants', 'messages']
+        fields = ['id', 'participants', 'created_at']
+        read_only_fields = ['created_at']
+
+class MessageSerializer(serializers.ModelSerializer):
+    sender = CustomUserSerializer(read_only=True)
+    conversation = serializers.PrimaryKeyRelatedField(queryset=Conversation.objects.all())
+    
+    class Meta:
+        model = Message
+        fields = ['id', 'conversation', 'sender', 'content', 'timestamp', 'is_read']
+        read_only_fields = ['sender', 'timestamp', 'is_read']

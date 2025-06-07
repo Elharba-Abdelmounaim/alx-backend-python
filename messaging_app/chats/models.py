@@ -1,6 +1,20 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+class CustomUser(AbstractUser):
+    
+    bio = models.TextField(blank=True, null=True)
+    # Custom user model extending AbstractUser to include a bio field
+    # Removed redundant 'User' class to avoid conflicts; use this as the primary user model
+    # Configure in settings.py: AUTH_USER_MODEL = 'myapp.CustomUser'
+
+    def __str__(self):
+        return self.username
+   
+    pass
+
+
+    
 class User(AbstractUser):
     bio = models.TextField(blank=True, null=True)
 
@@ -20,3 +34,4 @@ class Message(models.Model):
 
     def __str__(self):
         return f"Message from {self.sender.username} at {self.timestamp}"
+
