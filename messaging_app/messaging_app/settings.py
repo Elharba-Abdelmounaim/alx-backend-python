@@ -80,6 +80,13 @@ ROOT_URLCONF = 'messaging_app.urls'
 
 APPEND_SLASH = True
 
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_PAGINATION_CLASS': 'chats.pagination.CustomPagination',
+    'PAGE_SIZE': 20,
+}
+
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

@@ -19,8 +19,11 @@ class ConversationViewSet(viewsets.ModelViewSet):
         conversation.participants.add(self.request.user)
 
 class MessageViewSet(viewsets.ModelViewSet):
+    queryset = Message.objects.all().order_by('-timestamp')
     serializer_class = MessageSerializer
     permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = MessageFilter
     
     def get_queryset(self):
         # Only show messages in conversations the current user is part of
