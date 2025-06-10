@@ -1,17 +1,23 @@
-import logging
+# chats/middleware.py
+
 from datetime import datetime
 
 class RequestLoggingMiddleware:
+    # Constructor: called once when the server starts
     def __init__(self, get_response):
         self.get_response = get_response
-        self.logger = logging.getLogger('request_logger')
-        handler = logging.FileHandler('chats/requests.log')
-        formatter = logging.Formatter('%(message)s')
-        handler.setFormatter(formatter)
-        self.logger.addHandler(handler)
-        self.logger.setLevel(logging.INFO)
 
+    # This method is called for each request
     def __call__(self, request):
-        user = request.user if request.user.is_authenticated else 'AnonymousUser'
-        self.logger.info(f"{datetime.now()} - User: {user} - Path: {request.path}")
+        # Get username if authenticated, else Anonymous
+        user = request.user if hasattr(request, "user") and request.user.is_authenticated else "Anonymous"
+        
+        # Create the log entry string
+        log_entry = f"{datetime.now()} - User: {user} - Path: {request.path}\n"
+
+        # Append the log entry to a file
+        with open("chats/requests.log", "a") as log_file:
+            log_file.write(log_entry)
+
+        # Call the next middleware or view
         return self.get_response(request)
