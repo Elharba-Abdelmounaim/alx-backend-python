@@ -79,3 +79,13 @@ Django-signals_orm-0x04/
 └── README.md
 
 ```
+## 1. Message Edit Logging via Signal
+
+Whenever a message is edited, the `pre_save` signal logs the previous content to a `MessageHistory` model. The `edited` flag on the message indicates whether it has been modified.
+
+- **Signal**: `pre_save`
+- **Models**:
+  - `Message.edited`: Boolean
+  - `MessageHistory`: Stores the old content and timestamp
+
+This allows us to display a full message revision history in the UI.

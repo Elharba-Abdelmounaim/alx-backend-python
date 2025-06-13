@@ -4,5 +4,14 @@ from .models import Message, Notification
 
 @receiver(post_save, sender=Message)
 def create_notification(sender, instance, created, **kwargs):
-    if created:
-        Notification.objects.create(user=instance.receiver, message=instance)
+     if instance.id:
+        try:
+            old_message = Message.objects.get(id=instance.id)
+            if old_message.content != instance.content:
+                MessageHistory.objects.create(
+                    message=old_message,
+                    old_content=old_message.content
+                )
+                instance.edited = True
+        except Message.DoesNotExist:
+            pass

@@ -1,15 +1,19 @@
+# messaging/tests.py
+
 from django.test import TestCase
 from django.contrib.auth.models import User
-from .models import Message, Notification
+from .models import Message, MessageHistory
 
-# Create your tests here.
-class MessageNotificationTestCase(TestCase):
+class MessageEditSignalTest(TestCase):
     def setUp(self):
-        self.sender = User.objects.create_user(username='sender', password='123')
-        self.receiver = User.objects.create_user(username='receiver', password='123')
+        self.user1 = User.objects.create_user(username='user1')
+        self.user2 = User.objects.create_user(username='user2')
+        self.message = Message.objects.create(sender=self.user1, receiver=self.user2, content='Hello')
 
-    def test_notification_created_on_message(self):
-        message = Message.objects.create(sender=self.sender, receiver=self.receiver, content='Hi there!')
-        notification = Notification.objects.filter(user=self.receiver, message=message).first()
-        self.assertIsNotNone(notification)
-        self.assertFalse(notification.is_read)
+    def test_edit_creates_history(self):
+        self.message.content = 'Hello, again!'
+        self.message.save()
+
+        history = MessageHistory.objects.filter(message=self.message)
+        self.assertEqual(history.count(), 1)
+        self.assertEqual(history.first().old_content, 'Hello')
