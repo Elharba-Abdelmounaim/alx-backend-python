@@ -1,0 +1,19 @@
+<h2>Threaded Conversations</h2>
+{% for msg in messages %}
+  <div style="margin-bottom: 1em; border: 1px solid #ddd; padding: 10px;">
+    <strong>{{ msg.sender.username }}</strong>: {{ msg.content }}
+    <br><small>{{ msg.timestamp }}</small>
+
+    {% if msg.replies.all %}
+      <div style="margin-left: 2em; margin-top: 0.5em;">
+        <h4>Replies:</h4>
+        {% for reply in msg.replies.all %}
+          <div style="margin-bottom: 0.5em;">
+            <strong>{{ reply.sender.username }}</strong>: {{ reply.content }}
+            <br><small>{{ reply.timestamp }}</small>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+{% endfor %}

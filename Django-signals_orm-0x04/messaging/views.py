@@ -1,16 +1,9 @@
 from django.shortcuts import render
+from .models import Message
 
-# Create your views here.
-# messaging/views.py
+def threaded_conversations(request):
+    messages = Message.objects.filter(parent_message__isnull=True) \
+        .select_related('sender', 'receiver') \
+        .prefetch_related('replies')
 
-from django.shortcuts import redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout
-from django.contrib.auth.models import User
-
-@login_required
-def delete_user(request):
-    user = request.user
-    logout(request)
-    user.delete()
-    return redirect('home')  
+    return render(request, 'messaging/threaded_conversations.html', {'messages': messages})

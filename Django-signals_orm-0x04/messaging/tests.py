@@ -1,19 +1,39 @@
-# messaging/tests.py
-
-from django.test import TestCase
+from django.test import TestCase, Client
 from django.contrib.auth.models import User
-from .models import Message, Notification, MessageHistory
+from .models import Message
 
-class UserDeletionTest(TestCase):
+class ThreadedConversationTest(TestCase):
+
     def setUp(self):
-        self.sender = User.objects.create_user(username='sender')
-        self.receiver = User.objects.create_user(username='receiver')
-        self.message = Message.objects.create(sender=self.sender, receiver=self.receiver, content="Hi")
-        self.history = MessageHistory.objects.create(message=self.message, old_content="Old")
-        self.notification = Notification.objects.create(user=self.receiver, message=self.message)
+        # إنشاء مستخدمين
+        self.user1 = User.objects.create_user(username='alice', password='password123')
+        self.user2 = User.objects.create_user(username='bob', password='password123')
 
-    def test_user_deletion_cleans_related_data(self):
-        self.sender.delete()
-        self.assertEqual(Message.objects.count(), 0)
-        self.assertEqual(MessageHistory.objects.count(), 0)
-        self.assertEqual(Notification.objects.count(), 0)
+        # إنشاء رسالة أصلية
+        self.root_message = Message.objects.create(
+            sender=self.user1,
+            receiver=self.user2,
+            content="Hi Bob!"
+        )
+
+        # إنشاء رد عليها
+        self.reply1 = Message.objects.create(
+            sender=self.user2,
+            receiver=self.user1,
+            content="Hi Alice!",
+            parent_message=self.root_message
+        )
+
+        # عميل Django
+        self.client = Client()
+
+    def test_threaded_view_renders_root_messages(self):
+        response = self.client.get('/threads/')
+
+        # هل تم تحميل الصفحة بنجاح؟
+        self.assertEqual(response.status_code, 200)
+
+        # هل تحتوي الرسائل في السياق على الرسالة الأصلية فقط؟
+        messages = response.context['messages']
+        self.assertIn(self.root_message, messages)
+        self.assertNotIn(self.reply1, messages)  # الرد لا يجب أن يظهر كرسالة رئيسية
